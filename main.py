@@ -274,17 +274,15 @@ def store_image_in_db(user_id, file_path, file_name, metadata):
         binary_data = file.read()  # Read the entire file as binary data
 
     try:
-        cursor = connection.cursor()
-        # Adjusted SQL query to include the binary data
-        sql_insert_query = """ INSERT INTO images (user_id, image_name, image_path, image, metadata) VALUES (%s, %s, %s, %s, %s)"""
-        cursor.execute(sql_insert_query, (user_id, file_name, file_path, binary_data, metadata))
-        connection.commit()
-        print("Image inserted successfully into the images table")
-    except Exception as e:
-        print(f"Failed to insert image into MySQL table {e}")
-    finally:
-        cursor.close()
-
+        #cursor = connection.cursor()
+        with connection.cursor() as cursor:
+            # Adjusted SQL query to include the binary data
+            sql_insert_query = """ INSERT INTO images (user_id, image_name, image_path, image, metadata) VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(sql_insert_query, (user_id, file_name, file_path, binary_data, metadata))
+            connection.commit()
+            print("Image inserted successfully into the images table")
+        except Exception as e:
+            print(f"Failed to insert image into MySQL table {e}")
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
