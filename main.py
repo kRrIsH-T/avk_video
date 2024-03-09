@@ -75,7 +75,18 @@ port=26257
 dbname=loginapp 
 user=avk 
 password=vVwTyjQyFOrcNUcJ5ZAYiw
+sslcert=
+sslkey=
 sslmode=verify-full
+sslrootcert={cert_path}
+"""
+connection_string = f"""
+host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
+port=26257 
+dbname=loginapp 
+user=avk 
+password=vVwTyjQyFOrcNUcJ5ZAYiw
+sslmode=verify-ca
 sslrootcert={cert_path}
 """
 #user = "avk"
@@ -90,7 +101,7 @@ sslrootcert={cert_path}
 # connection_string = f"postgresql://{user}:{password}@{host}:{port}/{dbname}?sslmode={sslmode}&sslrootcert={sslrootcert}"
 # Connect to CockroachDB
 # print(f"Connection string: {connection_string}")
-connection_string = f"postgresql://avk:vVwTyjQyFOrcNUcJ5ZAYiw@iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/loginapp?sslmode=verify-full&sslrootcert=/opt/render/project/src/.postgresql/root.crt"
+# connection_string = f"postgresql://avk:vVwTyjQyFOrcNUcJ5ZAYiw@iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/loginapp?sslmode=verify-full&sslrootcert=/opt/render/project/src/.postgresql/root.crt"
 connection = psycopg2.connect(connection_string)
 # Create a cursor object
 cursor = connection.cursor()
