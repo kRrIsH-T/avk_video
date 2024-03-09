@@ -281,7 +281,7 @@ def store_image_in_db(user_id, file_path, file_name, metadata):
             cursor.execute(sql_insert_query, (user_id, file_name, file_path, binary_data, metadata))
             connection.commit()
             print("Image inserted successfully into the images table")
-        except Exception as e:
+    except Exception as e:
             print(f"Failed to insert image into MySQL table {e}")
 
 @app.route('/upload', methods=['GET', 'POST'])
