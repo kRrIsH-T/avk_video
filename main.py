@@ -55,7 +55,9 @@ def insert_audio(cursor, audio_name, audio_path):
             VALUES (%s, %s, %s, %s)
             """, (audio_name, audio_blob, audio_path, '{}'))
 current_directory = os.path.dirname(os.path.abspath(__file__))
+print(current_directory)
 cert_path = os.path.join(current_directory, '.postgresql', 'root.crt')
+print(cert_path)
 connection_string = f"""
 host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
 port=26257 
@@ -66,11 +68,12 @@ sslmode=verify-full
 sslrootcert={cert_path}
 """
 # Connect to CockroachDB
+print(connection_string)
 connection = psycopg2.connect(connection_string)
-
+print(connection)
 # Create a cursor object
 cursor = connection.cursor()
-
+print(cursor)
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS accounts (
       id SERIAL PRIMARY KEY,
