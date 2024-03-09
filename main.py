@@ -58,7 +58,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 print(current_directory)
 cert_path = os.path.join(current_directory, '.postgresql', 'root.crt')
 print(cert_path)
-connection_string = f"""
+connection_string1 = f"""
 host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
 port=26257 
 dbname=loginapp 
@@ -66,6 +66,14 @@ user=avk
 password=vVwTyjQyFOrcNUcJ5ZAYiw
 sslmode=verify-full
 sslrootcert={cert_path}
+"""
+connection_string = f"""
+host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
+port=26257 
+dbname=loginapp 
+user=avk 
+password=vVwTyjQyFOrcNUcJ5ZAYiw
+sslmode=disable
 """
 # Connect to CockroachDB
 print(connection_string)
@@ -81,7 +89,6 @@ cursor.execute("""
       email VARCHAR(255) NOT NULL,
       password VARCHAR(255) NOT NULL
     );
-    DROP TABLE IF EXISTS images;
     CREATE TABLE IF NOT EXISTS images (
       image_id SERIAL PRIMARY KEY,
       user_id INT NOT NULL,
@@ -90,7 +97,6 @@ cursor.execute("""
       image BYTEA,
       metadata TEXT
     );
-
     CREATE TABLE IF NOT EXISTS audio_library (
       audio_id SERIAL PRIMARY KEY,
       audio_name VARCHAR(255) NOT NULL,
