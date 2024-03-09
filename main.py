@@ -61,7 +61,6 @@ port=26257
 dbname=loginapp 
 user=avk 
 password=vVwTyjQyFOrcNUcJ5ZAYiw
-#sslmode=require
 sslmode=verify-full
 sslrootcert=$HOME/.postgresql/root.crt
 """
