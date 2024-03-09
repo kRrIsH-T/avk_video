@@ -54,16 +54,17 @@ def insert_audio(cursor, audio_name, audio_path):
             INSERT INTO audio_library (audio_name, audio_blob, audio_path, metadata) 
             VALUES (%s, %s, %s, %s)
             """, (audio_name, audio_blob, audio_path, '{}'))
-# Replace these values with your connection details
-connection_string = """
+current_directory = os.path.dirname(os.path.abspath(__file__))
+cert_path = os.path.join(current_directory, '.postgresql', 'root.crt')
+connection_string = f"""
 host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
 port=26257 
 dbname=loginapp 
 user=avk 
 password=vVwTyjQyFOrcNUcJ5ZAYiw
 sslmode=verify-full
-sslrootcert={}/.postgresql/root.crt
-""".format(os.environ['HOME'])
+sslrootcert={cert_path}
+"""
 # Connect to CockroachDB
 connection = psycopg2.connect(connection_string)
 
