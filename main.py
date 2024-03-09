@@ -55,10 +55,21 @@ def insert_audio(cursor, audio_name, audio_path):
             VALUES (%s, %s, %s, %s)
             """, (audio_name, audio_blob, audio_path, '{}'))
 current_directory = os.path.dirname(os.path.abspath(__file__))
-print(current_directory)
+print(f"Current directory: {current_directory}")
 cert_path = os.path.join(current_directory, '.postgresql', 'root.crt')
-print(cert_path)
-connection_string1 = f"""
+print(f"Certificate path: {cert_path}")
+# Read and print the certificate file
+try:
+    with open(cert_path, 'r') as cert_file:
+        cert_contents = cert_file.read()
+        print("Certificate contents:")
+        print(cert_contents)
+except FileNotFoundError:
+    print("Certificate file not found.")
+except Exception as e:
+    print(f"An error occurred while reading the certificate: {e}")
+    
+connection_string = f"""
 host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
 port=26257 
 dbname=loginapp 
@@ -67,21 +78,64 @@ password=vVwTyjQyFOrcNUcJ5ZAYiw
 sslmode=verify-full
 sslrootcert={cert_path}
 """
-connection_string = f"""
-host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
-port=26257 
-dbname=loginapp 
-user=avk 
-password=vVwTyjQyFOrcNUcJ5ZAYiw
-sslmode=disable
-"""
 # Connect to CockroachDB
-print(connection_string)
+print(f"Connection string: {connection_string}")
 connection = psycopg2.connect(connection_string)
-print(connection)
 # Create a cursor object
 cursor = connection.cursor()
-print(cursor)
+
+# Assuming the connection is successful, create a cursor object and print it
+if connection:
+    cursor = connection.cursor()
+    print(f"Cursor: {cursor}")
+
+    # Execute SQL commands and print a success message for each
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS accounts (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL
+            );
+        """)
+        print("Created table 'accounts'.")
+
+        cursor.execute("DROP TABLE IF EXISTS images;")
+        print("Dropped table 'images' (if existed).")
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS images (
+            image_id SERIAL PRIMARY KEY,
+            user_id INT NOT NULL,
+            image_name VARCHAR(255) NOT NULL,
+            image_path VARCHAR(255) NOT NULL,
+            image BYTEA,
+            metadata TEXT
+            );
+        """)
+        print("Created table 'images'.")
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS audio_library (
+            audio_id SERIAL PRIMARY KEY,
+            audio_name VARCHAR(255) NOT NULL,
+            audio_blob BYTEA NOT NULL,
+            audio_path VARCHAR(255),
+            metadata TEXT,
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        print("Created table 'audio_library'.")
+
+        # Commit the changes
+        connection.commit()
+    except psycopg2.Error as e:
+        print("An error occurred while executing SQL commands:")
+        print(e)
+else:
+    print("No connection could be established to the database.")
+    
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS accounts (
       id SERIAL PRIMARY KEY,
