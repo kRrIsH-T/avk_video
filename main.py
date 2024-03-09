@@ -172,9 +172,6 @@ for audio_file in audio_files:
 
 # Commit changes and close the connection
 connection.commit()
-# Close the communication with the database
-#cursor.close()
-#connection.close()
 
 #mysql = MySQL(app)
 
@@ -183,9 +180,9 @@ def login():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
-        account = cursor.fetchone()
+        with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
+            account = cursor.fetchone()
         if account and bcrypt.check_password_hash(account['password'], password):
             access_token = create_access_token(identity=username)
             session['loggedin'] = True
@@ -203,9 +200,9 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT * FROM accounts WHERE username LIKE %s", (username,))
-        account = cursor.fetchone()
+        with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM accounts WHERE username LIKE %s", (username,))
+            account = cursor.fetchone()
         if account:
             flash("Account already exists!", "danger")
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -216,8 +213,9 @@ def register():
             flash("Please fill out the form!", "danger")
         else:
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            cursor.execute('INSERT INTO accounts (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
-            #cursor.execute('INSERT INTO accounts VALUES (%s, %s, %s)', (username, email, hashed_password))
+            with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                cursor.execute('INSERT INTO accounts (username, email, password) VALUES (%s, %s, %s)', (username, email, hashed_password))
+                #cursor.execute('INSERT INTO accounts VALUES (%s, %s, %s)', (username, email, hashed_password))
             connection.commit()
             flash("You have successfully registered!", "success")
             return redirect(url_for('login'))
@@ -229,9 +227,9 @@ def register():
 def home():
     if 'loggedin' in session:
         user_id = session['id']
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM images WHERE user_id = %s', (user_id,))
-        images = cursor.fetchall()  # Fetches all user's images
+        with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute('SELECT * FROM images WHERE user_id = %s', (user_id,))
+            images = cursor.fetchall()  # Fetches all user's images
         return render_template('home/home.html', username=session['username'], images=images)
     else:
         return redirect(url_for('login'))
@@ -240,9 +238,9 @@ def home():
 def profile():
     if 'loggedin' in session:
         # Retrieve user account details from the database using the stored session['id']
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
-        account = cursor.fetchone()  # This fetches the user's account details as a dictionary
+        with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
+            account = cursor.fetchone()  # This fetches the user's account details as a dictionary
         # Check if account details are found
         if account:
             return render_template('auth/profile.html', account=account, title="Profile")
@@ -274,7 +272,6 @@ def store_image_in_db(user_id, file_path, file_name, metadata):
         binary_data = file.read()  # Read the entire file as binary data
 
     try:
-        #cursor = connection.cursor()
         with connection.cursor() as cursor:
             # Adjusted SQL query to include the binary data
             sql_insert_query = """ INSERT INTO images (user_id, image_name, image_path, image, metadata) VALUES (%s, %s, %s, %s, %s)"""
@@ -312,9 +309,9 @@ def upload_file():
 
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute('SELECT image, image_name FROM images WHERE image_id = %s', (image_id,))
-    image = cursor.fetchone()
+    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        cursor.execute('SELECT image, image_name FROM images WHERE image_id = %s', (image_id,))
+        image = cursor.fetchone()
     if image:
         try:
             # Convert memoryview to bytes if necessary
@@ -331,9 +328,9 @@ def serve_image(image_id):
 
 @app.route('/serve_audio/<int:audio_id>')
 def serve_audio(audio_id):
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute('SELECT audio_blob, audio_name FROM audio_library WHERE audio_id = %s', (audio_id,))
-    audio = cursor.fetchone()
+    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        cursor.execute('SELECT audio_blob, audio_name FROM audio_library WHERE audio_id = %s', (audio_id,))
+        audio = cursor.fetchone()
     if audio:
         try:
             # Convert memoryview to bytes if necessary
@@ -362,11 +359,11 @@ def create():
     output_video_path = None  # Initialize the variable to ensure it's set
 
     # Initialize cursor outside of the POST block to fetch images and audio files for the user
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute('SELECT image_id, image_name, image_path FROM images WHERE user_id = %s', (user_id,))
-    images = cursor.fetchall()
-    cursor.execute('SELECT audio_id, audio_name, audio_path FROM audio_library')
-    audio_files = cursor.fetchall()
+    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        cursor.execute('SELECT image_id, image_name, image_path FROM images WHERE user_id = %s', (user_id,))
+        images = cursor.fetchall()
+        cursor.execute('SELECT audio_id, audio_name, audio_path FROM audio_library')
+        audio_files = cursor.fetchall()
 
     # Handle form submission
     if request.method == 'POST' and form.validate():
@@ -390,9 +387,9 @@ def create():
             for selection in selected_images:
                 image_id = selection['id']
                 duration = float(selection['duration'])
-                # Fetch the image using the existing cursor
-                cursor.execute('SELECT image_path FROM images WHERE image_id = %s AND user_id = %s', (image_id, user_id))
-                image_record = cursor.fetchone()
+                with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                    cursor.execute('SELECT image_path FROM images WHERE image_id = %s AND user_id = %s', (image_id, user_id))
+                    image_record = cursor.fetchone()
                 if image_record:
                     image_record_path = image_record['image_path']
                 if image_record_path.startswith('./static/'):
@@ -418,8 +415,9 @@ def create():
             # Fetch and set the audio
             audio_clip = None
             if selected_audio_id:
-                cursor.execute('SELECT audio_path FROM audio_library WHERE audio_id = %s', (selected_audio_id,))
-                audio_record = cursor.fetchone()
+                with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                    cursor.execute('SELECT audio_path FROM audio_library WHERE audio_id = %s', (selected_audio_id,))
+                    audio_record = cursor.fetchone()
                 if audio_record:
                     # Correct the audio_file_path by removing the './' and replacing backslashes with forward slashes
                     #audio_file_path = os.path.join(app.static_folder, audio_record['audio_path'])  # Full path to the audio
@@ -458,15 +456,12 @@ def create():
             flash(f'Error creating video: {e}', 'danger')
             app.logger.error(f'Exception on /create [POST]: {e}', exc_info=True)
             video_path = None 
-        finally:
-            if cursor and not cursor.connection.closed:
-                cursor.close()  # Ensure cursor is closed after the operation
 
         # Redirect to the same page to show the form and the result
         return render_template('home/create.html', form=form, images=images, audio_files=audio_files, video_path=video_path)
     
     # Close the cursor for the GET request
-    cursor.close()
+    # cursor.close()
     # If it's a GET request or the form isn't validated, render the template normally
     return render_template('home/create.html', form=form, images=images, audio_files=audio_files, video_path=output_video_path)
 
