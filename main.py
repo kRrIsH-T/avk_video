@@ -69,7 +69,7 @@ except FileNotFoundError:
 except Exception as e:
     print(f"An error occurred while reading the certificate: {e}")
     
-connection_string = f"""
+connection_string1 = f"""
 host=iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud 
 port=26257 
 dbname=loginapp 
@@ -78,8 +78,19 @@ password=vVwTyjQyFOrcNUcJ5ZAYiw
 sslmode=verify-full
 sslrootcert={cert_path}
 """
+#user = "avk"
+#password = "vVwTyjQyFOrcNUcJ5ZAYiw"
+#host = "iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud"
+#port = 26257
+#dbname = "loginapp"
+#sslmode = "verify-full"
+#sslrootcert = cert_path  # Ensure this is the correct path to your root certificate
+
+# Convert to the URI format
+# connection_string = f"postgresql://{user}:{password}@{host}:{port}/{dbname}?sslmode={sslmode}&sslrootcert={sslrootcert}"
 # Connect to CockroachDB
-print(f"Connection string: {connection_string}")
+# print(f"Connection string: {connection_string}")
+connection_string = f"postgresql://avk:vVwTyjQyFOrcNUcJ5ZAYiw@iiitmysql-8859.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/loginapp?sslmode=verify-full&sslrootcert=/opt/render/project/src/.postgresql/root.crt"
 connection = psycopg2.connect(connection_string)
 # Create a cursor object
 cursor = connection.cursor()
