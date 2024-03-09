@@ -86,7 +86,7 @@ port=26257
 dbname=loginapp 
 user=avk 
 password=vVwTyjQyFOrcNUcJ5ZAYiw
-sslmode=verify-ca
+sslmode=require
 sslrootcert={cert_path}
 """
 #user = "avk"
