@@ -62,8 +62,8 @@ dbname=loginapp
 user=avk 
 password=vVwTyjQyFOrcNUcJ5ZAYiw
 sslmode=verify-full
-sslrootcert=$HOME/.postgresql/root.crt
-"""
+sslrootcert={}/.postgresql/root.crt
+""".format(os.environ['HOME'])
 # Connect to CockroachDB
 connection = psycopg2.connect(connection_string)
 
