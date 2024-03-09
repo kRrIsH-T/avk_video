@@ -101,9 +101,6 @@ if connection:
         """)
         print("Created table 'accounts'.")
 
-        cursor.execute("DROP TABLE IF EXISTS images;")
-        print("Dropped table 'images' (if existed).")
-
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS images (
             image_id SERIAL PRIMARY KEY,
